@@ -38,10 +38,9 @@ export default class HonkyTonkPiano extends HTMLElement {
   emit(eventType, detail) {
     const event = new CustomEvent(eventType, {
       bubbles: true,
-      composed: true,
       detail
     });
-    this.piano.dispatchEvent(event);
+    this.dispatchEvent(event);
   }
 
   handleKeyPressed(e) {
