@@ -7,10 +7,11 @@ master.connect(analyser);
 analyser.connect(AC.destination);
 
 /**
- * Create an oscillator
+ * Create an oscillator node
  * 
  * @param {string} type Oscillator type. sine, square, triangle
- * @param {value|AudioNode} freq frequency
+ * @param {value} freq frequency
+ * @returns {OscillatorNode} OscillatorNode
  */
 export function oscillator(type = 'sine', freq) {
   const osc = AC.createOscillator();
@@ -21,6 +22,12 @@ export function oscillator(type = 'sine', freq) {
   return osc;
 }
 
+/**
+ * Create a gain node
+ * 
+ * @param value 
+ * @returns {GainNode}
+ */
 export function gain(value = 1.0) {
   const gain = AC.createGain();
   gain.gain.value = value;
