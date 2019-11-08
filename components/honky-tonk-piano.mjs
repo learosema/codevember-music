@@ -2,7 +2,7 @@
 function getNote(element) {
   if (element.nodeName === 'KEY') {
     const value = element.getAttribute('value');
-    return value + '#';
+    return value[0] + '#' + value[1];
   }
   if (element.nodeName === 'WHITE') {
     const value = element.parentNode.getAttribute('value');
@@ -64,14 +64,14 @@ export default class HonkyTonkPiano extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <link rel="stylesheet" href="./components/honky-tonk-piano.css">
       <piano>
-        <key value="c"><white></white></key>
-        <key value="d"><white></white></key>
-        <key value="e"><white></white></key>
-        <key value="f"><white></white></key>
-        <key value="g"><white></white></key>
-        <key value="a"><white></white></key>
-        <key value="b"><white></white></key>
-        <key value="c'"><white></white></key>
+        <key value="C1"><white></white></key>
+        <key value="D1"><white></white></key>
+        <key value="E1"><white></white></key>
+        <key value="F1"><white></white></key>
+        <key value="G1"><white></white></key>
+        <key value="A1"><white></white></key>
+        <key value="B1"><white></white></key>
+        <key value="C2"><white></white></key>
       </piano>
     `
   }

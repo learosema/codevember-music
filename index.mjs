@@ -1,6 +1,8 @@
 import GLea from './lib/glea.mjs';
 import { frag, vert } from './shaders.mjs';
 import HonkyTonkPiano from './components/honky-tonk-piano.mjs';
+import { AC, master, toneFrequency, fmSynth } from './audio.mjs';
+
 
 HonkyTonkPiano.register();
 
@@ -30,5 +32,37 @@ function loop(time) {
 
 loop(0);
 
-window.addEventListener('note_on', (e) => { console.log(e); });
-window.addEventListener('note_off', (e) => { console.log(e); });
+const activeNotes = {
+
+}
+
+
+window.addEventListener('note_on', (e) => { 
+  const tone = e.detail.slice(0, -1);
+  const octave = parseInt(e.detail.slice(-1), 10)
+  const freq = toneFrequency(tone, octave);
+  console.log(tone, octave, freq);
+  if (AC.state === "suspended") {
+    AC.resume();
+  }
+  const synth = fmSynth({
+    carFreq: freq, 
+    modFreq: freq / 2, 
+    modGain: freq / 8
+  });
+  synth.connectTo(master).start();
+  activeNotes[e.detail] = synth;
+});
+
+window.addEventListener('note_off', (e) => { 
+  const synth = activeNotes[e.detail];
+  if (synth) {
+    activeNotes[e.detail] = null;
+    delete activeNotes[e.detail];
+    synth.output.gain.exponentialRampToValueAtTime(0.00001, AC.currentTime + .5)
+    setTimeout(() => {
+      synth.output.gain.value = 0;
+      synth.destroy();
+    }, 500);
+  }
+});
