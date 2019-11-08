@@ -38,6 +38,9 @@ const activeNotes = {
 
 
 window.addEventListener('note_on', (e) => { 
+  if (! e.detail) {
+    return;
+  }
   const tone = e.detail.slice(0, -1);
   const octave = parseInt(e.detail.slice(-1), 10)
   const freq = toneFrequency(tone, octave);
@@ -47,8 +50,9 @@ window.addEventListener('note_on', (e) => {
   }
   const synth = fmSynth({
     carFreq: freq, 
+    carType: 'triangle',
     modFreq: freq / 2, 
-    modGain: freq / 8
+    modGain: 400
   });
   synth.connectTo(master).start();
   activeNotes[e.detail] = synth;
@@ -59,10 +63,10 @@ window.addEventListener('note_off', (e) => {
   if (synth) {
     activeNotes[e.detail] = null;
     delete activeNotes[e.detail];
-    synth.output.gain.exponentialRampToValueAtTime(0.00001, AC.currentTime + .5)
+    synth.output.gain.exponentialRampToValueAtTime(0.01, AC.currentTime + 1)
     setTimeout(() => {
       synth.output.gain.value = 0;
       synth.destroy();
-    }, 500);
+    }, 1000);
   }
 });
