@@ -1,8 +1,14 @@
-export const AC = new AudioContext();
+export const AC = new (AudioContext || webkitAudioContext)();
 export const master = AC.createGain();
-export const analyser = AC.createAnalyser();
+const analyser = AC.createAnalyser({
+  fftSize: 64,
+  maxDecibels: -25,
+	minDecibels: -60,
+	smoothingTimeConstant: 0.5
+});
 
-master.gain.value = 1.0;
+const buffer = new Uint8Array(2);
+
 master.connect(analyser);
 analyser.connect(AC.destination);
 
@@ -53,9 +59,9 @@ export function toneFrequency(tone, octave) {
 }
 
 /**
- * FM Synth configuration parameters
+ * FM Synth parameters
  * 
- * @typedef {Object} FMSynthConfiguration
+ * @typedef {Object} FMSynthParams
  * @property {string} carType carrier type: sine, square, triangle or sawtooth
  * @property {number} carFreq carrier frequency
  * @property {number} carGain carrier gain
@@ -75,18 +81,19 @@ export function toneFrequency(tone, octave) {
 /**
  * FM Synth object
  * 
- * @typedef {object} FMSynthObject
+ * @typedef {object} FMSynthParams
  * @property {OscGainObject} modulator
  * @property {OscGainObject} carrier
  * @property {GainNode} output 
- * @property {function} connectTo connect synth
+ * @property {function} connectTo helper function to connect the synth
  * @property {function} start start oscillator
+ * @property {function} destroy stops all oscillators and disconnects them
  */
 
 /** 
  * Create FM synth
- * @param {FMSynthConfiguration}
- * @return {fmSynthObject}
+ * @param {FMSynthParams} fmSynthParams parameters
+ * @returns {FMSynthObject} fmSynthObject
  */
 export function fmSynth({
   carType = 'sine', carFreq = 440, carGain = 1.0, 
@@ -127,10 +134,23 @@ export function fmSynth({
       output.disconnect();
       return synth;
     },
+    fadeOut(seconds) {
+      return new Promise((resolve, reject) => {
+        synth.output.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 1);
+        setTimeout(() => resolve(), seconds * 1000);
+      });
+    },
     connectTo(node) {
       output.connect(node);
       return synth;
     }
   }
   return synth;
+}
+
+export function measureVolume() {
+  analyser.getByteFrequencyData(buffer);
+  // analyser.getByteTimeDomainData(buffer);
+  const result = buffer[0]|0;
+  return result;
 }

@@ -9,6 +9,7 @@ precision highp float;
 uniform float width;
 uniform float height;
 uniform float time;
+uniform float volume;
 
 // Calculate cameras "orthonormal basis", i.e. its transform matrix components
 vec3 getCameraRayDir(vec2 uv, vec3 camPos, vec3 camTarget) {
@@ -29,14 +30,14 @@ float sphere(vec3 p, float r)
 }
 
 float deformation(vec3 pos) {
-  return sin(time * .1) * 0.4 * sin(time * .3 + pos.x * 4.0) * 
-    sin(time *.2 + pos.y * 3.0) * 
-    sin(time * .3 + pos.z * 2.0);
+  return (.05 + (volume / 255.0)) * sin(time * .3 + pos.x * 8.0) * 
+    sin(time *.2 + pos.y * 6.0) * 
+    sin(time * .3 + pos.z * 4.0);
 }
 
 float scene(vec3 pos)
 {
-  float t = sphere(pos - vec3(0.0, 0.0, 10.0), 3.0) + deformation(pos);   
+  float t = sphere(pos - vec3(0.0, 1.0, 10.0), 3.0) + deformation(pos);   
   return t;
 }
 
@@ -61,12 +62,15 @@ float castRay(vec3 rayOrigin, vec3 rayDir)
 // I tried to achieve a somewhat cloudy background
 // maybe better with perlin noise.
 vec3 background(vec3 rayDir) {
-  return vec3(0.30, 0.36, 0.60) - 
+  return vec3(0.0, 0.36, 0.10) - 
     (sin(time *.1 + rayDir.x * rayDir.z * 10.0) * 
      sin(time *.2 + rayDir.y * rayDir.z * 15.0) * .1 + rayDir.y * .7);
 }
 
-
+vec3 audioBackground(vec3 pos) {
+  float pattern = sin((time * .01 + (pos.y - 1.0) * pos.x + atan(pos.y - 1.0, pos.x)) * (volume / 16.0));
+  return vec3(0, 0.36, 0.10) + vec3(pattern);
+}
 
 // calculate normal:
 vec3 calcNormal(vec3 pos)
@@ -82,14 +86,15 @@ vec3 calcNormal(vec3 pos)
 vec3 render(vec3 rayOrigin, vec3 rayDir)
 {
   float t = castRay(rayOrigin, rayDir);
-  if (t == -1.0) {
-    return background(rayDir);
-  }
+  
   // shading based on the distance
   // vec3 col = vec3(4.0 - t * 0.35) * vec3(.7, 0, 1.0);
   
   // shading based on the normals
   vec3 pos = rayOrigin + rayDir * t;
+  if (t == -1.0) {
+    return background(rayDir);
+  }
   vec3 N = calcNormal(pos);
   vec3 L = normalize(vec3(sin(time *.1), 2.0, -0.5));
   // L is vector from surface point to light
@@ -97,7 +102,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDir)
   float NoL = max(dot(N, L), 0.0);
   vec3 LDirectional = vec3(1.0, 0.9, 0.8) * NoL;
   vec3 LAmbient = vec3(0.3);
-  vec3 col = vec3(.7, .2, 1.0); 
+  vec3 col = vec3(.7, .1, .6); // + vec3(pattern); 
   vec3 diffuse = col * (LDirectional + LAmbient);  
   return diffuse;
 }

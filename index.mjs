@@ -1,9 +1,13 @@
 import GLea from './lib/glea.mjs';
 import { frag, vert } from './shaders.mjs';
 import HonkyTonkPiano from './components/honky-tonk-piano.mjs';
-import { AC, master, toneFrequency, fmSynth } from './audio.mjs';
+import { AC, master, toneFrequency, fmSynth, measureVolume } from './audio.mjs';
+
+const activeNotes = {}
+let volume = 0;
 
 
+master.gain.value = .6
 HonkyTonkPiano.register();
 
 const glea = new GLea({
@@ -22,19 +26,17 @@ window.addEventListener('resize', () => {
 
 function loop(time) {
   const { gl } = glea;
+  volume = Math.min(255, 5 * Object.keys(activeNotes).length + measureVolume());
   glea.clear();
   glea.uni('width', glea.width);
   glea.uni('height', glea.height);
   glea.uni('time', time * .005);
+  glea.uni('volume', volume);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   requestAnimationFrame(loop);
 }
 
 loop(0);
-
-const activeNotes = {
-
-}
 
 
 window.addEventListener('note_on', (e) => { 
@@ -51,8 +53,10 @@ window.addEventListener('note_on', (e) => {
   const synth = fmSynth({
     carFreq: freq, 
     carType: 'triangle',
+    carGain: .5,
+    modType: 'square',
     modFreq: freq / 2, 
-    modGain: 400
+    modGain: 20
   });
   synth.connectTo(master).start();
   activeNotes[e.detail] = synth;
@@ -63,10 +67,9 @@ window.addEventListener('note_off', (e) => {
   if (synth) {
     activeNotes[e.detail] = null;
     delete activeNotes[e.detail];
-    synth.output.gain.exponentialRampToValueAtTime(0.01, AC.currentTime + 1)
-    setTimeout(() => {
-      synth.output.gain.value = 0;
+    synth.fadeOut().then(() => {
       synth.destroy();
-    }, 1000);
+    });
   }
 });
+
