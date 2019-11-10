@@ -9,5 +9,5 @@ The plug at my seat did not work and I was running out of battery, so I had to b
 ## Running it
 
 * Use the github pages link: https://terabaud.github.io/codevember-music/
-* locally: `npm run` and `npm install` runs a minimal express web server
+* locally: `npm install` and `npm start` runs a minimal express web server
 
