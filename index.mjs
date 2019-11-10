@@ -3,11 +3,10 @@ import { frag, vert } from './shaders.mjs';
 import HonkyTonkPiano from './components/honky-tonk-piano.mjs';
 import { AC, master, toneFrequency, fmSynth, measureVolume } from './audio.mjs';
 
-const activeNotes = {}
+const activeNotes = {};
 let volume = 0;
 
-
-master.gain.value = .6
+master.gain.value = .6;
 HonkyTonkPiano.register();
 
 const glea = new GLea({
@@ -46,7 +45,6 @@ window.addEventListener('note_on', (e) => {
   const tone = e.detail.slice(0, -1);
   const octave = parseInt(e.detail.slice(-1), 10)
   const freq = toneFrequency(tone, octave);
-  console.log(tone, octave, freq);
   if (AC.state === "suspended") {
     AC.resume();
   }
@@ -59,6 +57,12 @@ window.addEventListener('note_on', (e) => {
     modGain: 20
   });
   synth.connectTo(master).start();
+  if (e.detail in activeNotes) {
+    const oldSynth = activeNotes[e.detail];
+    oldSynth.fadeOut().then(() => {
+      oldSynth.destroy();
+    });
+  }
   activeNotes[e.detail] = synth;
 });
 
@@ -72,4 +76,3 @@ window.addEventListener('note_off', (e) => {
     });
   }
 });
-
