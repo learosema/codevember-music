@@ -72,6 +72,13 @@ export default class HonkyTonkPiano extends HTMLElement {
         <key value="A1"><white></white></key>
         <key value="B1"><white></white></key>
         <key value="C2"><white></white></key>
+        <key value="D2"><white></white></key>
+        <key value="E2"><white></white></key>
+        <key value="F2"><white></white></key>
+        <key value="G2"><white></white></key>
+        <key value="A2"><white></white></key>
+        <key value="B2"><white></white></key>
+        <key value="C3"><white></white></key>
       </piano>
     `
   }

@@ -50,11 +50,11 @@ window.addEventListener('note_on', (e) => {
   }
   const synth = fmSynth({
     carFreq: freq, 
-    carType: 'triangle',
+    carType: 'sawtooth',
     carGain: .5,
-    modType: 'square',
-    modFreq: freq / 2, 
-    modGain: 20
+    modType: 'triangle',
+    modFreq: 300, 
+    modGain: 30
   });
   synth.connectTo(master).start();
   if (e.detail in activeNotes) {
@@ -71,7 +71,7 @@ window.addEventListener('note_off', (e) => {
   if (synth) {
     activeNotes[e.detail] = null;
     delete activeNotes[e.detail];
-    synth.fadeOut().then(() => {
+    synth.fadeOut(3.0).then(() => {
       synth.destroy();
     });
   }

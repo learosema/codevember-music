@@ -96,7 +96,7 @@ export function toneFrequency(tone, octave) {
  * @returns {FMSynthObject} fmSynthObject
  */
 export function fmSynth({
-  carType = 'sine', carFreq = 440, carGain = 1.0, 
+  carType = 'triangle', carFreq = 440, carGain = 1.0, 
   modType = 'sine', modFreq = 420, modGain = 20,
   outGain = 1.0}) {
   const carrier = {
@@ -125,18 +125,21 @@ export function fmSynth({
       return synth;
     },
     destroy() {
+
       modulator.osc.stop();
       carrier.osc.stop();
+
       carrier.osc.disconnect();
       carrier.gain.disconnect();
       modulator.osc.disconnect();
       modulator.gain.disconnect();
+
       output.disconnect();
       return synth;
     },
-    fadeOut(seconds) {
+    fadeOut(seconds = 5.0) {
       return new Promise((resolve, reject) => {
-        synth.output.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 1);
+        synth.output.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + seconds);
         setTimeout(() => resolve(), seconds * 1000);
       });
     },
