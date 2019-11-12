@@ -71,7 +71,7 @@ window.addEventListener('note_off', (e) => {
   if (synth) {
     activeNotes[e.detail] = null;
     delete activeNotes[e.detail];
-    synth.fadeOut(3.0).then(() => {
+    synth.fadeOut(2.0).then(() => {
       synth.destroy();
     });
   }
