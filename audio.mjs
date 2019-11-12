@@ -1,4 +1,4 @@
-export const AC = new (AudioContext || webkitAudioContext)();
+export const AC = "AudioContext" in window ? (new AudioContext()) : (new webkitAudioContext());
 export const master = AC.createGain();
 const analyser = AC.createAnalyser({
   fftSize: 64,
@@ -137,9 +137,9 @@ export function fmSynth({
       output.disconnect();
       return synth;
     },
-    fadeOut(seconds = 5.0) {
+    fadeOut(seconds = 2.0) {
       return new Promise((resolve, reject) => {
-        synth.output.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + seconds);
+        output.gain.exponentialRampToValueAtTime(0.01, AC.currentTime + seconds);
         setTimeout(() => resolve(), seconds * 1000);
       });
     },
